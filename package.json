@@ -1,0 +1,36 @@
+{
+  "name": "@rjegjin/pdf-booklet-maker",
+  "version": "0.1.0",
+  "description": "CLI tool for duplicating PDF pages onto A4 sheets.",
+  "type": "module",
+  "bin": {
+    "pdf-booklet-maker": "./src/cli.js"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --check src/cli.js && node --check src/layout.js"
+  },
+  "keywords": [
+    "pdf",
+    "booklet",
+    "a4",
+    "nup",
+    "duplicate",
+    "print",
+    "cli"
+  ],
+  "author": "MH JEONG <rjegjin@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
