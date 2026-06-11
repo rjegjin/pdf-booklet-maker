@@ -19,7 +19,7 @@ The long-term goal is larger:
 This project is intended to be published as:
 
 ```bash
-@rjegjin/pdf-booklet-maker
+@mhj6022/pdf-booklet-maker
 ```
 
 The CLI command is fixed as:
@@ -31,8 +31,8 @@ pdf-booklet-maker
 Example final usage:
 
 ```bash
-npx @rjegjin/pdf-booklet-maker input.pdf output.pdf --mode half
-npx @rjegjin/pdf-booklet-maker input.pdf output.pdf --mode eighth
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode half
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode eighth
 ```
 
 ---
@@ -75,7 +75,7 @@ The old Python saddle-stitch workflow may remain as historical or legacy code, b
 Duplicate each input PDF page twice on one A4 page.
 
 ```bash
-npx @rjegjin/pdf-booklet-maker input.pdf output.pdf --mode half
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode half
 ```
 
 Layout:
@@ -102,7 +102,7 @@ Use cases:
 Duplicate each input PDF page eight times on one A4 page using a 2 × 4 layout.
 
 ```bash
-npx @rjegjin/pdf-booklet-maker input.pdf output.pdf --mode eighth
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode eighth
 ```
 
 Layout:
@@ -282,13 +282,13 @@ The core principle is:
 After npm publication:
 
 ```bash
-npm install -g @rjegjin/pdf-booklet-maker
+npm install -g @mhj6022/pdf-booklet-maker
 ```
 
 or without installation:
 
 ```bash
-npx @rjegjin/pdf-booklet-maker input.pdf output.pdf --mode half
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode half
 ```
 
 ---
@@ -358,7 +358,7 @@ No extra options at first. The project should become reliable before becoming fl
 ```text
 v0.1.0
 - Node.js CLI package
-- package name: @rjegjin/pdf-booklet-maker
+- package name: @mhj6022/pdf-booklet-maker
 - command: pdf-booklet-maker
 - --mode half
 - --mode eighth

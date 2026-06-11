@@ -15,7 +15,7 @@ rjegjin/pdf-booklet-maker
 Target npm package name:
 
 ```text
-@rjegjin/pdf-booklet-maker
+@mhj6022/pdf-booklet-maker
 ```
 
 Fixed CLI command:
@@ -47,7 +47,7 @@ The project originally had a Python-oriented saddle-stitch booklet direction. Th
 2. Rebuild the npm/npx-facing tool in Node.js.
 3. Use `pdf-lib` for PDF manipulation.
 4. Use `commander` for CLI parsing.
-5. Publish under `@rjegjin/pdf-booklet-maker`.
+5. Publish under `@mhj6022/pdf-booklet-maker`.
 6. Keep the command name `pdf-booklet-maker`.
 7. Start with only two modes:
    - `--mode half`
@@ -130,7 +130,7 @@ The package is intended to look approximately like this:
 
 ```json
 {
-  "name": "@rjegjin/pdf-booklet-maker",
+  "name": "@mhj6022/pdf-booklet-maker",
   "version": "0.1.0",
   "description": "CLI tool for duplicating PDF pages onto A4 sheets.",
   "type": "module",
@@ -402,7 +402,7 @@ instead of hard-coding modes too deeply.
 
 - Node.js CLI package
 - command: `pdf-booklet-maker`
-- package: `@rjegjin/pdf-booklet-maker`
+- package: `@mhj6022/pdf-booklet-maker`
 - `--mode half`
 - `--mode eighth`
 - basic README
@@ -552,8 +552,8 @@ npm publish --access public
 After publish:
 
 ```bash
-npx @rjegjin/pdf-booklet-maker input.pdf output.pdf --mode half
-npx @rjegjin/pdf-booklet-maker input.pdf output.pdf --mode eighth
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode half
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode eighth
 ```
 
 ---

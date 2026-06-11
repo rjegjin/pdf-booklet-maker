@@ -1,6 +1,5 @@
 {
-  "name": "@rjegjin/pdf-booklet-maker",
-  "version": "0.1.0",
+  "name": "@mhj6022/pdf-booklet-maker",
   "description": "CLI tool for duplicating PDF pages onto A4 sheets.",
   "type": "module",
   "bin": {
@@ -32,5 +31,6 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "version": "0.1.0"
 }
