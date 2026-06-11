@@ -1,81 +1,61 @@
 # pdf-booklet-maker
 
-`pdf-booklet-maker` is a command-line PDF layout tool for teachers, small publishers, churches, study groups, and anyone who repeatedly prepares printable handouts.
+`pdf-booklet-maker` is a small command-line PDF layout tool for duplicating PDF pages onto A4 print layouts.
 
-The project originally started as a Python-based saddle-stitch booklet helper. From this point forward, the main direction is a native Node.js CLI package that can be used through `npm` and `npx`.
+It is designed for teachers, churches, study groups, small publishers, and anyone who needs repeatable printable handout layouts.
 
-The immediate goal is simple:
-
-> Take one PDF page and duplicate it onto an A4 sheet in useful print layouts.
-
-The long-term goal is larger:
-
-> Build a practical, scriptable, open-source PDF imposition tool that can handle classroom handouts, mini cards, booklet printing, crop marks, printable grids, and eventually GUI/web workflows.
+The project originally started as a Python-based saddle-stitch booklet helper. The active direction is now a native Node.js CLI package that can be used through `npm` and `npx`.
 
 ---
 
-## Package name
+## Quick Start
 
-This project is intended to be published as:
+Run without installation:
 
 ```bash
-@mhj6022/pdf-booklet-maker
+npx @mhj6022/pdf-booklet-maker input.pdf output-half.pdf --mode half
+npx @mhj6022/pdf-booklet-maker input.pdf output-eighth.pdf --mode eighth
 ```
 
-The CLI command is fixed as:
+Install globally:
 
 ```bash
-pdf-booklet-maker
+npm install -g @mhj6022/pdf-booklet-maker
+pdf-booklet-maker input.pdf output-half.pdf --mode half
 ```
 
-Example final usage:
+Show help:
 
 ```bash
-npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode half
-npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode eighth
+npx @mhj6022/pdf-booklet-maker --help
 ```
 
 ---
 
-## Why this project exists
+## Current published package
 
-Many teachers and document creators repeatedly need small but annoying PDF transformations:
+```text
+Package: @mhj6022/pdf-booklet-maker
+Command: pdf-booklet-maker
+Latest published version: 0.1.0
+Registry: https://registry.npmjs.org/
+```
 
-- duplicate the same worksheet twice on one A4 page
-- make 8 small copies of the same notice or card
-- prepare mini test papers
-- print vocabulary cards or Bible verse cards
-- make cuttable classroom materials
-- create booklet-style layouts
-- add cut lines and crop marks
-- automate the same layout from scripts, bots, or batch jobs
+The package is public on npm and currently provides two fixed duplicate layouts:
 
-Large PDF editors can do some of this, but they are often slow, GUI-heavy, paid, or awkward to automate. This project aims to make these workflows available as simple CLI commands.
-
----
-
-## Current status
-
-Early implementation stage.
-
-The project is being rebuilt as a native Node.js CLI using:
-
-- Node.js
-- `pdf-lib`
-- `commander`
-
-The old Python saddle-stitch workflow may remain as historical or legacy code, but the npm/npx-facing tool should not require users to install Python, pip, or virtual environments.
+- `--mode half`
+- `--mode eighth`
 
 ---
 
-## Phase 1: Minimum useful duplicate layouts
+## Current Features
 
 ### `--mode half`
 
 Duplicate each input PDF page twice on one A4 page.
 
 ```bash
-npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode half
+pdf-booklet-maker input.pdf output-half.pdf --mode half
 ```
 
 Layout:
@@ -102,7 +82,7 @@ Use cases:
 Duplicate each input PDF page eight times on one A4 page using a 2 × 4 layout.
 
 ```bash
-npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode eighth
+pdf-booklet-maker input.pdf output-eighth.pdf --mode eighth
 ```
 
 Layout:
@@ -130,9 +110,59 @@ Use cases:
 
 ---
 
-## Phase 2: General grid layout
+## npx Troubleshooting
 
-Planned option:
+If `npx` says:
+
+```text
+sh: 1: pdf-booklet-maker: not found
+```
+
+clear the local npx cache and retry:
+
+```bash
+rm -rf ~/.npm/_npx
+npx --yes @mhj6022/pdf-booklet-maker@0.1.0 --help
+```
+
+Alternatively, use `npm exec`:
+
+```bash
+npm exec --yes --package=@mhj6022/pdf-booklet-maker -- pdf-booklet-maker --help
+```
+
+You can also verify the package by installing it in a temporary directory:
+
+```bash
+tmpdir=$(mktemp -d)
+cd "$tmpdir"
+npm init -y >/dev/null
+npm install @mhj6022/pdf-booklet-maker@0.1.0
+node_modules/.bin/pdf-booklet-maker --help
+```
+
+---
+
+## Why this project exists
+
+Many teachers and document creators repeatedly need small but annoying PDF transformations:
+
+- duplicate the same worksheet twice on one A4 page
+- make 8 small copies of the same notice or card
+- prepare mini test papers
+- print vocabulary cards or Bible verse cards
+- make cuttable classroom materials
+- create booklet-style layouts
+- add cut lines and crop marks
+- automate the same layout from scripts, bots, or batch jobs
+
+Large PDF editors can do some of this, but they are often slow, GUI-heavy, paid, or awkward to automate. This project aims to make these workflows available as simple CLI commands.
+
+---
+
+## v0.2.0 target: General grid layout
+
+The next implementation target is:
 
 ```bash
 pdf-booklet-maker input.pdf output.pdf --grid 2x4
@@ -140,13 +170,16 @@ pdf-booklet-maker input.pdf output.pdf --grid 1x2
 pdf-booklet-maker input.pdf output.pdf --grid 3x3
 ```
 
-This generalizes `half` and `eighth` into arbitrary columns and rows.
-
 Planned behavior:
 
 ```text
 --grid CxR
 ```
+
+Where:
+
+- `C` = columns
+- `R` = rows
 
 Examples:
 
@@ -154,9 +187,25 @@ Examples:
 - `--grid 2x4`: two columns, four rows
 - `--grid 4x4`: four columns, four rows
 
+Shortcut relationship:
+
+```text
+--mode half    = --grid 1x2
+--mode eighth  = --grid 2x4
+```
+
+Validation rules:
+
+- use either `--mode` or `--grid`, not both
+- `--grid` must match `CxR`, for example `2x4`
+- columns and rows must be positive integers
+- very large grids should be rejected to prevent unusable output
+
 ---
 
-## Phase 3: Print-control options
+## Future roadmap
+
+### v0.3.0: Print-control options
 
 Planned options:
 
@@ -176,7 +225,7 @@ Purpose:
 
 ---
 
-## Phase 4: Cut lines and crop marks
+### v0.4.0: Cut lines and crop marks
 
 Planned options:
 
@@ -194,18 +243,9 @@ Use cases:
 - small group materials
 - labels and slips
 
-Possible future options:
-
-```bash
---cut-line-style dashed
---cut-line-width 0.5
---crop-mark-length 10
---crop-mark-offset 3
-```
-
 ---
 
-## Phase 5: Booklet imposition
+### v0.5.0+: Booklet imposition
 
 The project name is `pdf-booklet-maker`, so the long-term target includes true booklet imposition.
 
@@ -241,7 +281,7 @@ Use cases:
 
 ---
 
-## Phase 6: Batch automation
+## Batch automation future
 
 Planned features:
 
@@ -261,7 +301,7 @@ Use cases:
 
 ---
 
-## Phase 7: GUI and web future
+## GUI and web future
 
 The CLI is the foundation. Later, the same core layout engine can power:
 
@@ -274,22 +314,6 @@ The CLI is the foundation. Later, the same core layout engine can power:
 The core principle is:
 
 > CLI first, reusable layout engine second, GUI later.
-
----
-
-## Installation
-
-After npm publication:
-
-```bash
-npm install -g @mhj6022/pdf-booklet-maker
-```
-
-or without installation:
-
-```bash
-npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --mode half
-```
 
 ---
 
@@ -318,19 +342,6 @@ pdf-booklet-maker input.pdf output.pdf --mode half
 
 ---
 
-## First implementation target
-
-The first working version should support only this API:
-
-```bash
-pdf-booklet-maker <input> <output> --mode half
-pdf-booklet-maker <input> <output> --mode eighth
-```
-
-No extra options at first. The project should become reliable before becoming flexible.
-
----
-
 ## Design principles
 
 1. **Simple command first**  
@@ -349,7 +360,7 @@ No extra options at first. The project should become reliable before becoming fl
    The tool should solve real classroom document problems, not only abstract PDF manipulation problems.
 
 6. **Expandable architecture**  
-   `half` and `eighth` are only shortcuts over a future general grid engine.
+   `half` and `eighth` are shortcuts over a general grid engine.
 
 ---
 
@@ -362,9 +373,12 @@ v0.1.0
 - command: pdf-booklet-maker
 - --mode half
 - --mode eighth
+- npm publish complete
 
 v0.2.0
 - --grid CxR
+- --mode half as shortcut for --grid 1x2
+- --mode eighth as shortcut for --grid 2x4
 - basic validation
 - better error messages
 
