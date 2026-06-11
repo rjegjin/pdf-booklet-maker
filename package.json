@@ -4,7 +4,7 @@
   "description": "CLI tool for duplicating PDF pages onto A4 sheets.",
   "type": "module",
   "bin": {
-    "pdf-booklet-maker": "./src/cli.js"
+    "pdf-booklet-maker": "src/cli.js"
   },
   "files": [
     "src",
