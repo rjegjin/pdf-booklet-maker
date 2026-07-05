@@ -16,6 +16,12 @@ program
   .option("--gap <points>", "Gap between cells in points", "0")
   .option("--rotate <rotation>", "Rotation: auto, none, 90, 180, 270", "none")
   .option("--fit <fit>", "Cell fit: contain, cover, stretch", "contain")
+  .option("--cut-line", "Draw cut guide lines along cell boundaries")
+  .option("--cut-line-style <style>", "Cut-line style: dashed, solid", "dashed")
+  .option("--cut-line-width <points>", "Cut-line thickness in points", "0.5")
+  .option("--crop-mark", "Draw crop marks at cell corners")
+  .option("--crop-mark-length <points>", "Crop-mark length in points", "10")
+  .option("--crop-mark-offset <points>", "Crop-mark offset from the corner in points", "3")
   .action(async (input, output, options) => {
     try {
       const result = await duplicatePdf({
@@ -26,7 +32,13 @@ program
         margin: options.margin,
         gap: options.gap,
         rotate: options.rotate,
-        fit: options.fit
+        fit: options.fit,
+        cutLine: options.cutLine,
+        cutLineStyle: options.cutLineStyle,
+        cutLineWidth: options.cutLineWidth,
+        cropMark: options.cropMark,
+        cropMarkLength: options.cropMarkLength,
+        cropMarkOffset: options.cropMarkOffset
       });
 
       console.log("PDF generated successfully.");

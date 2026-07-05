@@ -3,6 +3,7 @@ import path from "node:path";
 import {
   PDFDocument,
   degrees,
+  rgb,
   pushGraphicsState,
   popGraphicsState,
   moveTo,
@@ -168,6 +169,109 @@ function clipToRect(outputPage, { x, y, width, height }) {
   );
 }
 
+export const CUT_LINE_STYLES = Object.freeze(["dashed", "solid"]);
+
+export function parseMarkOptions({
+  cutLine = false,
+  cutLineStyle = "dashed",
+  cutLineWidth = 0.5,
+  cropMark = false,
+  cropMarkLength = 10,
+  cropMarkOffset = 3
+} = {}) {
+  const lineWidth = Number(cutLineWidth);
+  const markLength = Number(cropMarkLength);
+  const markOffset = Number(cropMarkOffset);
+
+  if (!CUT_LINE_STYLES.includes(String(cutLineStyle))) {
+    throw new Error(`Invalid cut-line style: ${cutLineStyle}. Expected ${CUT_LINE_STYLES.join(", ")}.`);
+  }
+
+  if (!Number.isFinite(lineWidth) || lineWidth <= 0) {
+    throw new Error(`Cut-line width must be a positive number of points: ${cutLineWidth}`);
+  }
+
+  if (!Number.isFinite(markLength) || markLength <= 0) {
+    throw new Error(`Crop-mark length must be a positive number of points: ${cropMarkLength}`);
+  }
+
+  if (!Number.isFinite(markOffset) || markOffset < 0) {
+    throw new Error(`Crop-mark offset must be a non-negative number of points: ${cropMarkOffset}`);
+  }
+
+  return {
+    cutLine: Boolean(cutLine),
+    cutLineStyle: String(cutLineStyle),
+    cutLineWidth: lineWidth,
+    cropMark: Boolean(cropMark),
+    cropMarkLength: markLength,
+    cropMarkOffset: markOffset
+  };
+}
+
+function uniqueSorted(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted.filter((value, index) => index === 0 || value - sorted[index - 1] > 0.01);
+}
+
+function drawCutLines(outputPage, cells, { cutLineStyle, cutLineWidth }) {
+  const xs = uniqueSorted(cells.flatMap((cell) => [cell.x, cell.x + cell.width]));
+  const ys = uniqueSorted(cells.flatMap((cell) => [cell.y, cell.y + cell.height]));
+
+  const style = {
+    thickness: cutLineWidth,
+    color: rgb(0.6, 0.6, 0.6),
+    ...(cutLineStyle === "dashed" ? { dashArray: [4, 4] } : {})
+  };
+
+  for (const x of xs) {
+    outputPage.drawLine({ start: { x, y: 0 }, end: { x, y: A4_HEIGHT }, ...style });
+  }
+
+  for (const y of ys) {
+    outputPage.drawLine({ start: { x: 0, y }, end: { x: A4_WIDTH, y }, ...style });
+  }
+}
+
+function drawCropMarks(outputPage, cells, { cropMarkLength, cropMarkOffset }) {
+  const style = { thickness: 0.5, color: rgb(0, 0, 0) };
+
+  for (const cell of cells) {
+    const corners = [
+      { x: cell.x, y: cell.y, dx: -1, dy: -1 },
+      { x: cell.x + cell.width, y: cell.y, dx: 1, dy: -1 },
+      { x: cell.x, y: cell.y + cell.height, dx: -1, dy: 1 },
+      { x: cell.x + cell.width, y: cell.y + cell.height, dx: 1, dy: 1 }
+    ];
+
+    for (const { x, y, dx, dy } of corners) {
+      const hx = x + dx * cropMarkOffset;
+      const vy = y + dy * cropMarkOffset;
+
+      outputPage.drawLine({
+        start: { x: hx, y },
+        end: { x: hx + dx * cropMarkLength, y },
+        ...style
+      });
+      outputPage.drawLine({
+        start: { x, y: vy },
+        end: { x, y: vy + dy * cropMarkLength },
+        ...style
+      });
+    }
+  }
+}
+
+function drawMarks(outputPage, cells, markOptions) {
+  if (markOptions.cutLine) {
+    drawCutLines(outputPage, cells, markOptions);
+  }
+
+  if (markOptions.cropMark) {
+    drawCropMarks(outputPage, cells, markOptions);
+  }
+}
+
 function drawDuplicatedPage({
   outputPage,
   embeddedPage,
@@ -245,15 +349,38 @@ function drawDuplicatedPage({
   }
 }
 
-export async function duplicatePdf({ input, output, mode, grid, margin, gap, rotate, fit }) {
+export async function duplicatePdf({
+  input,
+  output,
+  mode,
+  grid,
+  margin,
+  gap,
+  rotate,
+  fit,
+  cutLine,
+  cutLineStyle,
+  cutLineWidth,
+  cropMark,
+  cropMarkLength,
+  cropMarkOffset
+}) {
   assertPdfPath(input, "Input");
   assertPdfPath(output, "Output");
 
   const { columns, rows } = resolveLayout({ mode, grid });
   const printOptions = parsePrintOptions({ margin, gap, rotate, fit });
+  const markOptions = parseMarkOptions({
+    cutLine,
+    cutLineStyle,
+    cutLineWidth,
+    cropMark,
+    cropMarkLength,
+    cropMarkOffset
+  });
 
   // Fail fast on impossible margin/gap combinations.
-  computeCells({ columns, rows, margin: printOptions.margin, gap: printOptions.gap });
+  const { cells } = computeCells({ columns, rows, margin: printOptions.margin, gap: printOptions.gap });
 
   const inputBytes = await fs.readFile(input);
   const sourcePdf = await PDFDocument.load(inputBytes);
@@ -278,6 +405,8 @@ export async function duplicatePdf({ input, output, mode, grid, margin, gap, rot
       rows,
       ...printOptions
     });
+
+    drawMarks(outputPage, cells, markOptions);
   }
 
   const outputBytes = await outputPdf.save();
