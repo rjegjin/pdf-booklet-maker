@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { duplicatePdf, MODES } from "./layout.js";
+import { imposeBooklet, DUPLEX_MODES } from "./booklet.js";
 
 const program = new Command();
 
@@ -22,8 +23,31 @@ program
   .option("--crop-mark", "Draw crop marks at cell corners")
   .option("--crop-mark-length <points>", "Crop-mark length in points", "10")
   .option("--crop-mark-offset <points>", "Crop-mark offset from the corner in points", "3")
+  .option("--booklet", "Saddle-stitch booklet imposition (2-up on landscape A4)")
+  .option("--saddle-stitch", "Alias for --booklet")
+  .option("--signature-size <pages>", "Pages per signature (multiple of 4, default: whole document)")
+  .option("--duplex <edge>", `Duplex printing edge: ${DUPLEX_MODES.join(", ")}`, "short-edge")
   .action(async (input, output, options) => {
     try {
+      const booklet = options.booklet || options.saddleStitch;
+
+      if (booklet && (options.mode || options.grid)) {
+        throw new Error("--booklet cannot be combined with --mode or --grid.");
+      }
+
+      if (booklet) {
+        const result = await imposeBooklet({
+          input,
+          output,
+          signatureSize: options.signatureSize,
+          duplex: options.duplex
+        });
+
+        console.log("Booklet PDF generated successfully.");
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
       const result = await duplicatePdf({
         input,
         output,
