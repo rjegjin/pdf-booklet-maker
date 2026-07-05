@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { parseGrid, resolveLayout, parsePrintOptions, parseMarkOptions, computeCells } from "../src/layout.js";
 import { getImpositionOrder, parseSignatureSize } from "../src/booklet.js";
+import { patternToRegExp, outputPathFor } from "../src/batch.js";
 
 test("parseGrid parses CxR", () => {
   assert.deepEqual(parseGrid("2x4"), { columns: 2, rows: 4 });
@@ -43,6 +44,21 @@ test("getImpositionOrder matches saddle-stitch order", () => {
   assert.deepEqual(getImpositionOrder(8).order, [8, 1, 2, 7, 6, 3, 4, 5]);
   // 6 pages pad to 8
   assert.equal(getImpositionOrder(6).workingPages, 8);
+});
+
+test("patternToRegExp matches glob-style patterns", () => {
+  assert.ok(patternToRegExp("*.pdf").test("worksheet.pdf"));
+  assert.ok(patternToRegExp("worksheet-*.pdf").test("worksheet-a.pdf"));
+  assert.ok(!patternToRegExp("worksheet-*.pdf").test("notes.pdf"));
+  assert.ok(patternToRegExp("week-?.pdf").test("week-1.pdf"));
+  assert.ok(!patternToRegExp("week-?.pdf").test("week-10.pdf"));
+});
+
+test("outputPathFor appends suffix before extension", () => {
+  assert.equal(
+    outputPathFor({ inputFile: "/in/doc.pdf", outputDir: "/out", suffix: "-8up" }),
+    "/out/doc-8up.pdf"
+  );
 });
 
 test("parseSignatureSize validates multiples of 4", () => {

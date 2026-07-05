@@ -50,13 +50,14 @@ The package is public on npm and currently provides two fixed duplicate layouts:
 
 ## Current status
 
-Phases 1–5 are implemented (v0.5.0):
+Phases 1–6 are implemented (v0.6.0):
 
 - `--mode half` / `--mode eighth` duplicate layouts
 - `--grid CxR` arbitrary grid layouts
 - `--margin`, `--gap`, `--rotate auto|none|90|180|270`, `--fit contain|cover|stretch`
 - `--cut-line` (with `--cut-line-style`, `--cut-line-width`) and `--crop-mark` (with `--crop-mark-length`, `--crop-mark-offset`)
 - `--booklet` / `--saddle-stitch` true saddle-stitch imposition with `--signature-size` and `--duplex short-edge|long-edge`
+- `--input-dir` / `--output-dir` / `--pattern` / `--suffix` batch conversion of whole folders
 
 ```bash
 # 8 copies of each page with cut guides
@@ -64,6 +65,9 @@ npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --grid 2x4 --gap 8 --cut-lin
 
 # saddle-stitch booklet, 8-page signatures, long-edge duplex printer
 npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --booklet --signature-size 8 --duplex long-edge
+
+# convert every worksheet in a folder to 2x2 grids
+npx @mhj6022/pdf-booklet-maker --input-dir ./pdfs --output-dir ./out --pattern "worksheet-*.pdf" --grid 2x2
 ```
 
 Built with Node.js, `pdf-lib`, and `commander`. No Python, pip, or virtual environments required; the old Python saddle-stitch workflow remains as legacy code only.
