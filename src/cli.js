@@ -10,13 +10,15 @@ program
   .description("Duplicate PDF pages into printable A4 layouts.")
   .argument("<input>", "Input PDF")
   .argument("<output>", "Output PDF")
-  .requiredOption("--mode <mode>", `Layout mode: ${Object.keys(MODES).join(", ")}`)
+  .option("--mode <mode>", `Layout mode: ${Object.keys(MODES).join(", ")}`)
+  .option("--grid <CxR>", "Custom grid layout, e.g. 2x4 (columns x rows)")
   .action(async (input, output, options) => {
     try {
       const result = await duplicatePdf({
         input,
         output,
-        mode: options.mode
+        mode: options.mode,
+        grid: options.grid
       });
 
       console.log("PDF generated successfully.");

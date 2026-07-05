@@ -29,6 +29,47 @@ export function getLayoutForMode(mode) {
   return layout;
 }
 
+export const MAX_GRID_DIMENSION = 12;
+
+export function parseGrid(grid) {
+  if (typeof grid !== "string") {
+    throw new Error("Grid must be a string like 2x4.");
+  }
+
+  const match = grid.trim().toLowerCase().match(/^(\d+)x(\d+)$/);
+
+  if (!match) {
+    throw new Error(`Invalid grid format: ${grid}. Expected CxR, e.g. 2x4.`);
+  }
+
+  const columns = Number(match[1]);
+  const rows = Number(match[2]);
+
+  if (columns < 1 || rows < 1 || columns > MAX_GRID_DIMENSION || rows > MAX_GRID_DIMENSION) {
+    throw new Error(
+      `Grid dimensions must be between 1 and ${MAX_GRID_DIMENSION}: ${grid}`
+    );
+  }
+
+  return { columns, rows };
+}
+
+export function resolveLayout({ mode, grid }) {
+  if (mode && grid) {
+    throw new Error("Use either --mode or --grid, not both.");
+  }
+
+  if (grid) {
+    return parseGrid(grid);
+  }
+
+  if (mode) {
+    return getLayoutForMode(mode);
+  }
+
+  throw new Error("A layout is required: pass --mode or --grid.");
+}
+
 function assertPdfPath(filePath, label) {
   if (!filePath || typeof filePath !== "string") {
     throw new Error(`${label} path is required.`);
@@ -77,11 +118,11 @@ function drawDuplicatedPage({ outputPage, embeddedPage, sourceWidth, sourceHeigh
   }
 }
 
-export async function duplicatePdf({ input, output, mode }) {
+export async function duplicatePdf({ input, output, mode, grid }) {
   assertPdfPath(input, "Input");
   assertPdfPath(output, "Output");
 
-  const { columns, rows } = getLayoutForMode(mode);
+  const { columns, rows } = resolveLayout({ mode, grid });
 
   const inputBytes = await fs.readFile(input);
   const sourcePdf = await PDFDocument.load(inputBytes);
@@ -113,7 +154,8 @@ export async function duplicatePdf({ input, output, mode }) {
   return {
     input,
     output,
-    mode,
+    mode: mode ?? null,
+    grid: `${columns}x${rows}`,
     pages: sourcePages.length,
     columns,
     rows
