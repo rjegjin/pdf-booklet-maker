@@ -12,13 +12,21 @@ program
   .argument("<output>", "Output PDF")
   .option("--mode <mode>", `Layout mode: ${Object.keys(MODES).join(", ")}`)
   .option("--grid <CxR>", "Custom grid layout, e.g. 2x4 (columns x rows)")
+  .option("--margin <points>", "Outer margin around the sheet in points", "0")
+  .option("--gap <points>", "Gap between cells in points", "0")
+  .option("--rotate <rotation>", "Rotation: auto, none, 90, 180, 270", "none")
+  .option("--fit <fit>", "Cell fit: contain, cover, stretch", "contain")
   .action(async (input, output, options) => {
     try {
       const result = await duplicatePdf({
         input,
         output,
         mode: options.mode,
-        grid: options.grid
+        grid: options.grid,
+        margin: options.margin,
+        gap: options.gap,
+        rotate: options.rotate,
+        fit: options.fit
       });
 
       console.log("PDF generated successfully.");
