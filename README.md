@@ -37,14 +37,11 @@ npx @mhj6022/pdf-booklet-maker --help
 ```text
 Package: @mhj6022/pdf-booklet-maker
 Command: pdf-booklet-maker
-Latest published version: 0.1.0
+Latest published version: 0.6.0
 Registry: https://registry.npmjs.org/
 ```
 
-The package is public on npm and currently provides two fixed duplicate layouts:
-
-- `--mode half`
-- `--mode eighth`
+The package is public on npm and provides duplicate layouts, arbitrary grids, print-control options, cut/crop marks, saddle-stitch booklet imposition, and batch conversion.
 
 ---
 
@@ -148,7 +145,7 @@ clear the local npx cache and retry:
 
 ```bash
 rm -rf ~/.npm/_npx
-npx --yes @mhj6022/pdf-booklet-maker@0.1.0 --help
+npx --yes @mhj6022/pdf-booklet-maker@latest --help
 ```
 
 Alternatively, use `npm exec`:
@@ -163,7 +160,7 @@ You can also verify the package by installing it in a temporary directory:
 tmpdir=$(mktemp -d)
 cd "$tmpdir"
 npm init -y >/dev/null
-npm install @mhj6022/pdf-booklet-maker@0.1.0
+npm install @mhj6022/pdf-booklet-maker@latest
 node_modules/.bin/pdf-booklet-maker --help
 ```
 
@@ -186,9 +183,9 @@ Large PDF editors can do some of this, but they are often slow, GUI-heavy, paid,
 
 ---
 
-## v0.2.0 target: General grid layout
+## General grid layout (implemented in v0.5.0)
 
-The next implementation target is:
+Usage:
 
 ```bash
 pdf-booklet-maker input.pdf output.pdf --grid 2x4
@@ -229,11 +226,11 @@ Validation rules:
 
 ---
 
-## Future roadmap
+## Implemented feature reference
 
-### v0.3.0: Print-control options
+### Print-control options (v0.5.0)
 
-Planned options:
+Options:
 
 ```bash
 --margin <points>
@@ -251,14 +248,13 @@ Purpose:
 
 ---
 
-### v0.4.0: Cut lines and crop marks
+### Cut lines and crop marks (v0.5.0)
 
-Planned options:
+Options:
 
 ```bash
 --cut-line
 --crop-mark
---registration-mark
 ```
 
 Use cases:
@@ -271,9 +267,9 @@ Use cases:
 
 ---
 
-### v0.5.0+: Booklet imposition
+### Booklet imposition (v0.5.0)
 
-The project name is `pdf-booklet-maker`, so the long-term target includes true booklet imposition.
+True saddle-stitch booklet imposition, the feature the project is named after.
 
 Example conceptual transformation:
 
@@ -286,7 +282,7 @@ Booklet print order:
 2 | 3
 ```
 
-Planned modes:
+Modes:
 
 ```bash
 --booklet
@@ -307,9 +303,9 @@ Use cases:
 
 ---
 
-## Batch automation future
+## Batch automation (implemented in v0.6.0)
 
-Planned features:
+Options:
 
 ```bash
 --input-dir ./pdfs
