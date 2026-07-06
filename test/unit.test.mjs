@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { parseGrid, resolveLayout, parsePrintOptions, parseMarkOptions, computeCells } from "../src/layout.js";
 import { getImpositionOrder, parseSignatureSize } from "../src/booklet.js";
 import { patternToRegExp, outputPathFor } from "../src/batch.js";
+import { startServer } from "../src/server.js";
 
 test("parseGrid parses CxR", () => {
   assert.deepEqual(parseGrid("2x4"), { columns: 2, rows: 4 });
@@ -66,4 +67,22 @@ test("parseSignatureSize validates multiples of 4", () => {
   assert.equal(parseSignatureSize("8", 20), 8);
   assert.throws(() => parseSignatureSize("6", 20));
   assert.throws(() => parseSignatureSize("2", 20));
+});
+
+test("web server serves UI and rejects bad convert requests", async () => {
+  const { server, port } = await startServer({ port: 0 });
+
+  try {
+    const page = await fetch(`http://127.0.0.1:${port}/`);
+    assert.equal(page.status, 200);
+    assert.match(await page.text(), /PDF Booklet Maker/);
+
+    const emptyBody = await fetch(`http://127.0.0.1:${port}/api/convert?grid=2x2`, { method: "POST" });
+    assert.equal(emptyBody.status, 400);
+
+    const notFound = await fetch(`http://127.0.0.1:${port}/nope`);
+    assert.equal(notFound.status, 404);
+  } finally {
+    server.close();
+  }
 });

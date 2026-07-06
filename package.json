@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "start": "node src/cli.js",
-    "test": "node --check src/cli.js && node --check src/layout.js && node --check src/booklet.js && node --test test/unit.test.mjs"
+    "test": "node --check src/cli.js && node --check src/layout.js && node --check src/booklet.js && node --check src/batch.js && node --check src/server.js && node --test test/unit.test.mjs"
   },
   "keywords": [
     "pdf",
@@ -32,5 +32,5 @@
   "engines": {
     "node": ">=18"
   },
-  "version": "0.6.0"
+  "version": "0.7.0"
 }

@@ -32,8 +32,18 @@ program
   .option("--output-dir <dir>", "Batch mode: directory for converted PDFs")
   .option("--pattern <glob>", "Batch mode: filename pattern (* and ? wildcards)", "*.pdf")
   .option("--suffix <suffix>", "Batch mode: output filename suffix (default: derived from layout)")
+  .option("--serve", "Start a local web UI instead of converting")
+  .option("--port <port>", "Port for the web UI", "8383")
   .action(async (input, output, options) => {
     try {
+      if (options.serve) {
+        const { startServer } = await import("./server.js");
+        const { port, host } = await startServer({ port: Number(options.port) });
+        console.log(`PDF Booklet Maker web UI running at http://${host}:${port}`);
+        console.log("Press Ctrl+C to stop.");
+        return;
+      }
+
       const booklet = options.booklet || options.saddleStitch;
 
       if (booklet && (options.mode || options.grid)) {

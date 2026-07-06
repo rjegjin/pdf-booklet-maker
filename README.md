@@ -37,7 +37,7 @@ npx @mhj6022/pdf-booklet-maker --help
 ```text
 Package: @mhj6022/pdf-booklet-maker
 Command: pdf-booklet-maker
-Latest published version: 0.6.0
+Latest published version: 0.7.0
 Registry: https://registry.npmjs.org/
 ```
 
@@ -47,7 +47,7 @@ The package is public on npm and provides duplicate layouts, arbitrary grids, pr
 
 ## Current status
 
-Phases 1–6 are implemented (v0.6.0):
+Phases 1–7 are implemented (v0.7.0):
 
 - `--mode half` / `--mode eighth` duplicate layouts
 - `--grid CxR` arbitrary grid layouts
@@ -55,6 +55,7 @@ Phases 1–6 are implemented (v0.6.0):
 - `--cut-line` (with `--cut-line-style`, `--cut-line-width`) and `--crop-mark` (with `--crop-mark-length`, `--crop-mark-offset`)
 - `--booklet` / `--saddle-stitch` true saddle-stitch imposition with `--signature-size` and `--duplex short-edge|long-edge`
 - `--input-dir` / `--output-dir` / `--pattern` / `--suffix` batch conversion of whole folders
+- `--serve` local drag-and-drop web UI (no extra dependencies)
 
 ```bash
 # 8 copies of each page with cut guides
@@ -65,6 +66,9 @@ npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --booklet --signature-size 8
 
 # convert every worksheet in a folder to 2x2 grids
 npx @mhj6022/pdf-booklet-maker --input-dir ./pdfs --output-dir ./out --pattern "worksheet-*.pdf" --grid 2x2
+
+# open the local drag-and-drop web UI at http://127.0.0.1:8383
+npx @mhj6022/pdf-booklet-maker --serve
 ```
 
 Built with Node.js, `pdf-lib`, and `commander`. No Python, pip, or virtual environments required; the old Python saddle-stitch workflow remains as legacy code only.
@@ -323,13 +327,22 @@ Use cases:
 
 ---
 
-## GUI and web future
+## Local web UI (implemented in v0.7.0)
 
-The CLI is the foundation. Later, the same core layout engine can power:
+The same layout engine now powers a local drag-and-drop web UI:
+
+```bash
+pdf-booklet-maker --serve            # http://127.0.0.1:8383
+pdf-booklet-maker --serve --port 9000
+```
+
+- drag and drop a PDF, pick grid or booklet options, download the result
+- runs entirely on your machine (binds to 127.0.0.1, no data leaves the computer)
+- zero extra dependencies — built on node:http
+
+Possible future directions on the same engine:
 
 - Electron desktop app
-- simple local web UI
-- drag-and-drop browser version
 - school document automation pipeline
 - server-side batch service
 
