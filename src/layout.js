@@ -392,8 +392,12 @@ export async function duplicatePdf({
     throw new Error("Input PDF has no pages.");
   }
 
-  for (const sourcePage of sourcePages) {
-    const embeddedPage = await outputPdf.embedPage(sourcePage);
+  // Embed all pages in one call so resources shared between pages
+  // (fonts, images) are copied once instead of once per page.
+  const embeddedPages = await outputPdf.embedPages(sourcePages);
+
+  for (const [index, sourcePage] of sourcePages.entries()) {
+    const embeddedPage = embeddedPages[index];
     const outputPage = outputPdf.addPage([A4_WIDTH, A4_HEIGHT]);
 
     drawDuplicatedPage({

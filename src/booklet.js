@@ -104,14 +104,10 @@ export async function imposeBooklet({ input, output, signatureSize, duplex = "sh
 
   const outputPdf = await PDFDocument.create();
   const sourcePages = sourcePdf.getPages();
-  const embeddedCache = new Map();
 
-  async function embed(globalIndex) {
-    if (!embeddedCache.has(globalIndex)) {
-      embeddedCache.set(globalIndex, await outputPdf.embedPage(sourcePages[globalIndex]));
-    }
-    return embeddedCache.get(globalIndex);
-  }
+  // Embed all pages in one call so resources shared between pages
+  // (fonts, images) are copied once instead of once per page.
+  const embeddedPages = await outputPdf.embedPages(sourcePages);
 
   let sheets = 0;
 
@@ -138,7 +134,7 @@ export async function imposeBooklet({ input, output, signatureSize, duplex = "sh
 
         drawHalf({
           sheetPage,
-          embeddedPage: await embed(globalIndex),
+          embeddedPage: embeddedPages[globalIndex],
           sourceWidth: sourcePage.getWidth(),
           sourceHeight: sourcePage.getHeight(),
           half: rotate180 ? 1 - half : half,
