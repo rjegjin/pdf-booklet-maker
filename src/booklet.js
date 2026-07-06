@@ -83,7 +83,7 @@ function drawHalf({ sheetPage, embeddedPage, sourceWidth, sourceHeight, half, ro
   }
 }
 
-async function buildSourceWithCover(contentPdf, { coverPath, coverTitle, coverSubtitle, coverAuthor, coverDate, coverFont }) {
+async function buildSourceWithCover(contentPdf, { coverPath, coverTitle, coverSubtitle, coverAuthor, coverDate, coverLabel, coverStyle, coverFont }) {
   let coverBytes = null;
 
   if (coverPath && coverTitle) {
@@ -101,6 +101,8 @@ async function buildSourceWithCover(contentPdf, { coverPath, coverTitle, coverSu
       subtitle: coverSubtitle,
       author: coverAuthor,
       date: coverDate,
+      label: coverLabel,
+      style: coverStyle ?? "classic",
       width: firstPage.getWidth(),
       height: firstPage.getHeight(),
       fontPath: coverFont
@@ -134,6 +136,8 @@ export async function imposeBooklet({
   coverSubtitle,
   coverAuthor,
   coverDate,
+  coverLabel,
+  coverStyle,
   coverFont
 }) {
   assertPdfPath(input, "Input");
@@ -156,6 +160,8 @@ export async function imposeBooklet({
     coverSubtitle,
     coverAuthor,
     coverDate,
+    coverLabel,
+    coverStyle,
     coverFont
   });
   const totalPages = sourcePdf.getPageCount();

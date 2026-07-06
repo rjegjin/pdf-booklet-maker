@@ -33,6 +33,8 @@ program
   .option("--cover-subtitle <text>", "Booklet: subtitle for the generated cover")
   .option("--cover-author <text>", "Booklet: author line for the generated cover")
   .option("--cover-date <text>", "Booklet: date line for the generated cover")
+  .option("--cover-label <text>", "Booklet: small heading above the generated cover title (e.g. Message)")
+  .option("--cover-style <style>", "Booklet: generated cover style: classic, header", "classic")
   .option("--cover-font <file>", "Booklet: .ttf/.otf font for the generated cover (default: auto-detect)")
   .option("--input-dir <dir>", "Batch mode: convert every matching PDF in this directory")
   .option("--output-dir <dir>", "Batch mode: directory for converted PDFs")
@@ -76,6 +78,8 @@ program
               coverSubtitle: options.coverSubtitle,
               coverAuthor: options.coverAuthor,
               coverDate: options.coverDate,
+              coverLabel: options.coverLabel,
+              coverStyle: options.coverStyle,
               coverFont: options.coverFont
             })
         : ({ input: convertInput, output: convertOutput }) =>

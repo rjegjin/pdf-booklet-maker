@@ -87,6 +87,10 @@ const PAGE = `<!DOCTYPE html>
       <label><input type="radio" name="coverKind" value="upload"> Use a cover PDF</label>
     </div>
     <div class="row" id="coverGenFields" style="display:none">
+      <label>Style
+        <select id="coverStyle"><option value="header">header (상단 제목)</option><option value="classic">classic (중앙 제목+테두리)</option></select>
+      </label>
+      <label>Label <input type="text" id="coverLabel" placeholder="Message (선택)" style="width:8rem"></label>
       <label>Title <input type="text" id="coverTitle" placeholder="소책자 제목" style="width:14rem"></label>
       <label>Subtitle <input type="text" id="coverSubtitle" placeholder="부제 (선택)" style="width:12rem"></label>
       <label>Author <input type="text" id="coverAuthor" placeholder="작성자 (선택)" style="width:8rem"></label>
@@ -171,6 +175,9 @@ go.addEventListener("click", async () => {
       const title = document.getElementById("coverTitle").value.trim();
       if (!title) { status.innerHTML = '<span class="err">Cover title is required to generate a cover.</span>'; return; }
       params.set("coverTitle", title);
+      params.set("coverStyle", document.getElementById("coverStyle").value);
+      const label = document.getElementById("coverLabel").value.trim();
+      if (label) params.set("coverLabel", label);
       const sub = document.getElementById("coverSubtitle").value.trim();
       const author = document.getElementById("coverAuthor").value.trim();
       const date = document.getElementById("coverDate").value.trim();
@@ -294,7 +301,9 @@ async function handleConvert(req, res, url) {
         coverTitle: q.get("coverTitle") ?? undefined,
         coverSubtitle: q.get("coverSubtitle") ?? undefined,
         coverAuthor: q.get("coverAuthor") ?? undefined,
-        coverDate: q.get("coverDate") ?? undefined
+        coverDate: q.get("coverDate") ?? undefined,
+        coverLabel: q.get("coverLabel") ?? undefined,
+        coverStyle: q.get("coverStyle") ?? undefined
       });
     } else {
       await duplicatePdf({

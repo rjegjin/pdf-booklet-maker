@@ -5,7 +5,7 @@ import { parseGrid, resolveLayout, parsePrintOptions, parseMarkOptions, computeC
 import { getImpositionOrder, parseSignatureSize } from "../src/booklet.js";
 import { patternToRegExp, outputPathFor } from "../src/batch.js";
 import { startServer } from "../src/server.js";
-import { generateCoverPdf } from "../src/cover.js";
+import { generateCoverPdf, wrapTitle } from "../src/cover.js";
 import { PDFDocument } from "pdf-lib";
 
 test("parseGrid parses CxR", () => {
@@ -85,6 +85,28 @@ test("generateCoverPdf produces a small single-page PDF (CJK as outlines)", asyn
   assert.ok(bytes.length < 100 * 1024, `cover too large: ${bytes.length} bytes`);
 
   await assert.rejects(() => generateCoverPdf({}), /title is required/);
+  await assert.rejects(() => generateCoverPdf({ title: "x", style: "fancy" }), /Invalid cover style/);
+});
+
+test("wrapTitle breaks long titles at word boundaries", () => {
+  const measure = (text, size) => text.length * size; // 1 char = size pt
+  assert.deepEqual(wrapTitle(measure, "short", 10, 500), ["short"]);
+  assert.deepEqual(
+    wrapTitle(measure, "one two three four", 10, 90),
+    ["one two", "three", "four"]
+  );
+  assert.deepEqual(wrapTitle(measure, "a\nb", 10, 500), ["a", "b"]);
+});
+
+test("generateCoverPdf header style renders", async () => {
+  const bytes = await generateCoverPdf({
+    title: "내 삶에 새로운 시작을 주님께서 해주시도록 하고 있습니까?",
+    subtitle: "(4월 메세지)",
+    label: "Message",
+    style: "header"
+  });
+  const doc = await PDFDocument.load(bytes);
+  assert.equal(doc.getPageCount(), 1);
 });
 
 test("web server serves UI and rejects bad convert requests", async () => {
