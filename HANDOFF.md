@@ -1,6 +1,10 @@
-# pdf-booklet-maker handoff
+# pdf-booklet-maker handoff (Historical — v0.1.0 era)
 
-This document summarizes the current state of the `rjegjin/pdf-booklet-maker` project so the next agent or developer can continue without reconstructing the conversation history.
+**NOTE (2026-07-06):** This document is preserved as historical reference from early project development (v0.1.0 planning). The project is now at **v0.9.0** with all planned phases (1–7) implemented and published to npm. See `CONTEXT.md` and `RESOLVED.md` for current status, and `README.md` for current features.
+
+---
+
+This document originally summarized the state of the `rjegjin/pdf-booklet-maker` project from the v0.1.0 phase.
 
 ---
 

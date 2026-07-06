@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-07-06 — 표지 스타일 확장 및 자동 텍스트 줄바꿈 (v0.9.0)
+
+- `--cover-style header` 옵션: 상단 정렬 제목 + 작은 헤딩(`--cover-label`) 스타일 추가
+- `--cover-style classic` (기본값): 기존 중앙 제목 + 테두리 스타일
+- 긴 제목 자동 줄바꿈: 양쪽 스타일에서 단어 경계 기준 랩핑 구현
+- 웹 UI: 커버 스타일/라벨 필드 추가
+- 단위 테스트: `wrapTitle()` 함수, 헤더 스타일 렌더링 검증 추가
+- npm 게시: v0.9.0 (latest)
+
+## 2026-07-06 — 생성형 표지 페이지 및 PDF 커버 합병 (v0.8.0)
+
+- `--cover <file.pdf>` 기존 커버 PDF 합병 기능
+- `--cover-title`/`--cover-subtitle`/`--cover-author`/`--cover-date` 생성형 표지 옵션
+- CJK 글꼴 처리: fontkit glyph paths로 벡터 아웃라인 렌더링
+  - 이유: fontkit CJK subsetting이 invalid embedded fonts 생성 + 전체 포함 시 ~13MB 용량
+  - `fc-match`로 시스템 한글 글꼴 자동 감지
+- 웹 UI: 커버 섹션 (생성/업로드 모드 전환), `/api/convert` JSON base64 본문 지원 추가
+- npm 게시: v0.8.0
+
 ## 2026-07-05 — README 로드맵 Phase 2~5 구현 완료 (v0.5.0)
 
 - Phase 2: `--grid CxR` 임의 격자 (--mode 하위호환 유지)

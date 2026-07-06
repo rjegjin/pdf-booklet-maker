@@ -37,17 +37,17 @@ npx @mhj6022/pdf-booklet-maker --help
 ```text
 Package: @mhj6022/pdf-booklet-maker
 Command: pdf-booklet-maker
-Latest published version: 0.7.0
+Latest version: 0.9.0 (published to npm)
 Registry: https://registry.npmjs.org/
 ```
 
-The package is public on npm and provides duplicate layouts, arbitrary grids, print-control options, cut/crop marks, saddle-stitch booklet imposition, and batch conversion.
+The package is public on npm and provides duplicate layouts, arbitrary grids, print-control options, cut/crop marks, saddle-stitch booklet imposition, batch conversion, generated/custom cover pages, and local web UI.
 
 ---
 
 ## Current status
 
-Phases 1–7 are implemented (v0.7.0):
+Phases 1–7 are fully implemented (v0.7.0+), with cover generation now at v0.9.0:
 
 - `--mode half` / `--mode eighth` duplicate layouts
 - `--grid CxR` arbitrary grid layouts
@@ -55,8 +55,11 @@ Phases 1–7 are implemented (v0.7.0):
 - `--cut-line` (with `--cut-line-style`, `--cut-line-width`) and `--crop-mark` (with `--crop-mark-length`, `--crop-mark-offset`)
 - `--booklet` / `--saddle-stitch` true saddle-stitch imposition with `--signature-size` and `--duplex short-edge|long-edge`
 - `--input-dir` / `--output-dir` / `--pattern` / `--suffix` batch conversion of whole folders
-- `--serve` local drag-and-drop web UI
-- `--cover <file.pdf>` prepend an existing cover, or `--cover-title` (+ `--cover-subtitle`, `--cover-author`, `--cover-date`) to generate a typographic cover — CJK titles are drawn as vector outlines, so no font embedding is needed
+- `--serve` local drag-and-drop web UI with auto browser open (disable with `--no-open`)
+- `--cover <file.pdf>` prepend an existing cover PDF, or `--cover-title` (+ `--cover-subtitle`, `--cover-author`, `--cover-date`) to generate a typographic cover
+  - CJK titles are drawn as vector outlines via fontkit glyph paths (system font auto-detected with `fc-match`), so no font embedding is needed
+  - `--cover-style classic` (centered title with border) or `header` (top-aligned with small heading, v0.9.0+)
+  - `--cover-label` (small heading above title, e.g. "Message")
 
 ```bash
 # 8 copies of each page with cut guides
@@ -65,8 +68,11 @@ npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --grid 2x4 --gap 8 --cut-lin
 # saddle-stitch booklet, 8-page signatures, long-edge duplex printer
 npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --booklet --signature-size 8 --duplex long-edge
 
-# booklet with a generated Korean cover page
+# booklet with a generated Korean cover page (classic style)
 npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --booklet --cover-title "화학 학습자료" --cover-subtitle "3학년 1학기" --cover-author "MH"
+
+# booklet with header-style cover (top-aligned title with label)
+npx @mhj6022/pdf-booklet-maker input.pdf output.pdf --booklet --cover-style header --cover-label "Message" --cover-title "내 삶에 새로운 시작을 주님께서..."
 
 # convert every worksheet in a folder to 2x2 grids
 npx @mhj6022/pdf-booklet-maker --input-dir ./pdfs --output-dir ./out --pattern "worksheet-*.pdf" --grid 2x2
