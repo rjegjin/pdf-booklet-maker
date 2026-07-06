@@ -34,13 +34,21 @@ program
   .option("--suffix <suffix>", "Batch mode: output filename suffix (default: derived from layout)")
   .option("--serve", "Start a local web UI instead of converting")
   .option("--port <port>", "Port for the web UI", "8383")
+  .option("--no-open", "Do not open the browser automatically with --serve")
   .action(async (input, output, options) => {
     try {
       if (options.serve) {
-        const { startServer } = await import("./server.js");
+        const { startServer, openBrowser } = await import("./server.js");
         const { port, host } = await startServer({ port: Number(options.port) });
-        console.log(`PDF Booklet Maker web UI running at http://${host}:${port}`);
+        const address = `http://${host}:${port}`;
+
+        console.log(`PDF Booklet Maker web UI running at ${address}`);
         console.log("Press Ctrl+C to stop.");
+
+        if (options.open) {
+          openBrowser(address);
+        }
+
         return;
       }
 

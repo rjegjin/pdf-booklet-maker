@@ -2,7 +2,7 @@ import http from "node:http";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import crypto from "node:crypto";
+import { spawn, execFileSync } from "node:child_process";
 import { duplicatePdf } from "./layout.js";
 import { imposeBooklet } from "./booklet.js";
 
@@ -255,6 +255,35 @@ export function createAppServer() {
       res.end(error.message);
     }
   });
+}
+
+export function openBrowser(url) {
+  const candidates = process.platform === "darwin"
+    ? [["open", [url]]]
+    : process.platform === "win32"
+      ? [["cmd", ["/c", "start", "", url]]]
+      : [
+          // WSL first: open in the Windows host browser.
+          ["wslview", [url]],
+          ["xdg-open", [url]]
+        ];
+
+  for (const [command, args] of candidates) {
+    try {
+      execFileSync("which", [command], { stdio: "ignore" });
+    } catch {
+      if (command !== "cmd") continue;
+    }
+
+    try {
+      spawn(command, args, { detached: true, stdio: "ignore" }).unref();
+      return true;
+    } catch {
+      // try the next candidate
+    }
+  }
+
+  return false;
 }
 
 export function startServer({ port = 8383, host = "127.0.0.1" } = {}) {
