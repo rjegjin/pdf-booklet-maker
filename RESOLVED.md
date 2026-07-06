@@ -14,4 +14,6 @@
 - node:test 단위 테스트 7건 추가, 각 Phase마다 PDF 생성 후 픽셀/시각 검증 완료
 - Phase 6: `--input-dir`/`--output-dir`/`--pattern`/`--suffix` 배치 변환 (v0.6.0)
 - npm 게시 완료: 0.5.0, 0.6.0 (latest)
-- 미해결: git push 실패 — SSH 키 미등록 + .secrets/.env의 GITHUB_PERSONAL_ACCESS_TOKEN 만료. 커밋 5건이 로컬에만 있음
+- Phase 7: `--serve` 로컬 드래그&드롭 웹 UI (v0.7.0) — node:http, 의존성 0
+- git push 정상화: HTTPS + credential helper(.secrets/.env PAT) 설정 완료
+- npm 게시: 0.7.0 (latest), GitHub main 동기화 완료 — 로드맵 Phase 1~7 전체 완료
