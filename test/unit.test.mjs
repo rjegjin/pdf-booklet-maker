@@ -5,6 +5,8 @@ import { parseGrid, resolveLayout, parsePrintOptions, parseMarkOptions, computeC
 import { getImpositionOrder, parseSignatureSize } from "../src/booklet.js";
 import { patternToRegExp, outputPathFor } from "../src/batch.js";
 import { startServer } from "../src/server.js";
+import { generateCoverPdf } from "../src/cover.js";
+import { PDFDocument } from "pdf-lib";
 
 test("parseGrid parses CxR", () => {
   assert.deepEqual(parseGrid("2x4"), { columns: 2, rows: 4 });
@@ -67,6 +69,22 @@ test("parseSignatureSize validates multiples of 4", () => {
   assert.equal(parseSignatureSize("8", 20), 8);
   assert.throws(() => parseSignatureSize("6", 20));
   assert.throws(() => parseSignatureSize("2", 20));
+});
+
+test("generateCoverPdf produces a small single-page PDF (CJK as outlines)", async () => {
+  const bytes = await generateCoverPdf({
+    title: "화학 학습자료",
+    subtitle: "3학년 1학기",
+    author: "테스트",
+    date: "2026-07-06"
+  });
+
+  const doc = await PDFDocument.load(bytes);
+  assert.equal(doc.getPageCount(), 1);
+  // outlines instead of an embedded CJK font keep it far under 100 KB
+  assert.ok(bytes.length < 100 * 1024, `cover too large: ${bytes.length} bytes`);
+
+  await assert.rejects(() => generateCoverPdf({}), /title is required/);
 });
 
 test("web server serves UI and rejects bad convert requests", async () => {

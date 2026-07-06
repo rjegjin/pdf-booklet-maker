@@ -28,6 +28,12 @@ program
   .option("--saddle-stitch", "Alias for --booklet")
   .option("--signature-size <pages>", "Pages per signature (multiple of 4, default: whole document)")
   .option("--duplex <edge>", `Duplex printing edge: ${DUPLEX_MODES.join(", ")}`, "short-edge")
+  .option("--cover <file.pdf>", "Booklet: prepend an existing cover PDF before imposition")
+  .option("--cover-title <text>", "Booklet: generate a cover page with this title")
+  .option("--cover-subtitle <text>", "Booklet: subtitle for the generated cover")
+  .option("--cover-author <text>", "Booklet: author line for the generated cover")
+  .option("--cover-date <text>", "Booklet: date line for the generated cover")
+  .option("--cover-font <file>", "Booklet: .ttf/.otf font for the generated cover (default: auto-detect)")
   .option("--input-dir <dir>", "Batch mode: convert every matching PDF in this directory")
   .option("--output-dir <dir>", "Batch mode: directory for converted PDFs")
   .option("--pattern <glob>", "Batch mode: filename pattern (* and ? wildcards)", "*.pdf")
@@ -64,7 +70,13 @@ program
               input: convertInput,
               output: convertOutput,
               signatureSize: options.signatureSize,
-              duplex: options.duplex
+              duplex: options.duplex,
+              coverPath: options.cover,
+              coverTitle: options.coverTitle,
+              coverSubtitle: options.coverSubtitle,
+              coverAuthor: options.coverAuthor,
+              coverDate: options.coverDate,
+              coverFont: options.coverFont
             })
         : ({ input: convertInput, output: convertOutput }) =>
             duplicatePdf({

@@ -79,6 +79,24 @@ const PAGE = `<!DOCTYPE html>
     </div>
   </fieldset>
 
+  <fieldset id="coverOpts" style="display:none">
+    <legend>Cover (표지)</legend>
+    <div class="row">
+      <label><input type="radio" name="coverKind" value="none" checked> No cover</label>
+      <label><input type="radio" name="coverKind" value="generate"> Generate a cover</label>
+      <label><input type="radio" name="coverKind" value="upload"> Use a cover PDF</label>
+    </div>
+    <div class="row" id="coverGenFields" style="display:none">
+      <label>Title <input type="text" id="coverTitle" placeholder="소책자 제목" style="width:14rem"></label>
+      <label>Subtitle <input type="text" id="coverSubtitle" placeholder="부제 (선택)" style="width:12rem"></label>
+      <label>Author <input type="text" id="coverAuthor" placeholder="작성자 (선택)" style="width:8rem"></label>
+      <label>Date <input type="text" id="coverDate" placeholder="2026-07-06 (선택)" style="width:8rem"></label>
+    </div>
+    <div class="row" id="coverUploadField" style="display:none">
+      <label>Cover PDF <input type="file" id="coverFile" accept="application/pdf"></label>
+    </div>
+  </fieldset>
+
   <button id="go" disabled>Convert</button>
   <div id="status"></div>
 </main>
@@ -117,17 +135,52 @@ for (const radio of document.querySelectorAll('input[name=kind]')) {
     const booklet = document.querySelector('input[name=kind]:checked').value === "booklet";
     document.getElementById("gridOpts").style.display = booklet ? "none" : "";
     document.getElementById("bookletOpts").style.display = booklet ? "" : "none";
+    document.getElementById("coverOpts").style.display = booklet ? "" : "none";
+  });
+}
+
+for (const radio of document.querySelectorAll('input[name=coverKind]')) {
+  radio.addEventListener("change", () => {
+    const kind = document.querySelector('input[name=coverKind]:checked').value;
+    document.getElementById("coverGenFields").style.display = kind === "generate" ? "" : "none";
+    document.getElementById("coverUploadField").style.display = kind === "upload" ? "" : "none";
+  });
+}
+
+function toBase64(f) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(f);
   });
 }
 
 go.addEventListener("click", async () => {
   const booklet = document.querySelector('input[name=kind]:checked').value === "booklet";
   const params = new URLSearchParams();
+  let coverFileToSend = null;
   if (booklet) {
     params.set("booklet", "1");
     const sig = document.getElementById("signatureSize").value;
     if (sig) params.set("signatureSize", sig);
     params.set("duplex", document.getElementById("duplex").value);
+
+    const coverKind = document.querySelector('input[name=coverKind]:checked').value;
+    if (coverKind === "generate") {
+      const title = document.getElementById("coverTitle").value.trim();
+      if (!title) { status.innerHTML = '<span class="err">Cover title is required to generate a cover.</span>'; return; }
+      params.set("coverTitle", title);
+      const sub = document.getElementById("coverSubtitle").value.trim();
+      const author = document.getElementById("coverAuthor").value.trim();
+      const date = document.getElementById("coverDate").value.trim();
+      if (sub) params.set("coverSubtitle", sub);
+      if (author) params.set("coverAuthor", author);
+      if (date) params.set("coverDate", date);
+    } else if (coverKind === "upload") {
+      coverFileToSend = document.getElementById("coverFile").files[0];
+      if (!coverFileToSend) { status.innerHTML = '<span class="err">Choose a cover PDF or switch cover mode.</span>'; return; }
+    }
   } else {
     params.set("grid", document.getElementById("cols").value + "x" + document.getElementById("rows").value);
     params.set("margin", document.getElementById("margin").value);
@@ -141,11 +194,24 @@ go.addEventListener("click", async () => {
   go.disabled = true;
   status.textContent = "Converting…";
   try {
-    const res = await fetch("/api/convert?" + params, {
-      method: "POST",
-      headers: { "content-type": "application/pdf" },
-      body: file
-    });
+    let fetchOptions;
+    if (coverFileToSend) {
+      fetchOptions = {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          pdf: await toBase64(file),
+          cover: await toBase64(coverFileToSend)
+        })
+      };
+    } else {
+      fetchOptions = {
+        method: "POST",
+        headers: { "content-type": "application/pdf" },
+        body: file
+      };
+    }
+    const res = await fetch("/api/convert?" + params, fetchOptions);
     if (!res.ok) throw new Error(await res.text());
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -191,20 +257,44 @@ async function handleConvert(req, res, url) {
     throw new Error("Empty request body; POST the PDF bytes.");
   }
 
+  let pdfBytes = body;
+  let coverBytes = null;
+
+  if ((req.headers["content-type"] ?? "").includes("application/json")) {
+    const parsed = JSON.parse(body.toString("utf8"));
+
+    if (!parsed.pdf) {
+      throw new Error("JSON body must include a base64 'pdf' field.");
+    }
+
+    pdfBytes = Buffer.from(parsed.pdf, "base64");
+    coverBytes = parsed.cover ? Buffer.from(parsed.cover, "base64") : null;
+  }
+
   const q = url.searchParams;
   const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "pdf-booklet-"));
   const inputPath = path.join(workDir, "input.pdf");
+  const coverPath = path.join(workDir, "cover.pdf");
   const outputPath = path.join(workDir, "output.pdf");
 
   try {
-    await fs.writeFile(inputPath, body);
+    await fs.writeFile(inputPath, pdfBytes);
+
+    if (coverBytes) {
+      await fs.writeFile(coverPath, coverBytes);
+    }
 
     if (q.get("booklet")) {
       await imposeBooklet({
         input: inputPath,
         output: outputPath,
         signatureSize: q.get("signatureSize") ?? undefined,
-        duplex: q.get("duplex") ?? "short-edge"
+        duplex: q.get("duplex") ?? "short-edge",
+        coverPath: coverBytes ? coverPath : undefined,
+        coverTitle: q.get("coverTitle") ?? undefined,
+        coverSubtitle: q.get("coverSubtitle") ?? undefined,
+        coverAuthor: q.get("coverAuthor") ?? undefined,
+        coverDate: q.get("coverDate") ?? undefined
       });
     } else {
       await duplicatePdf({

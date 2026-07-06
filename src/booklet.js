@@ -83,7 +83,59 @@ function drawHalf({ sheetPage, embeddedPage, sourceWidth, sourceHeight, half, ro
   }
 }
 
-export async function imposeBooklet({ input, output, signatureSize, duplex = "short-edge" }) {
+async function buildSourceWithCover(contentPdf, { coverPath, coverTitle, coverSubtitle, coverAuthor, coverDate, coverFont }) {
+  let coverBytes = null;
+
+  if (coverPath && coverTitle) {
+    throw new Error("Use either --cover or --cover-title, not both.");
+  }
+
+  if (coverPath) {
+    assertPdfPath(coverPath, "Cover");
+    coverBytes = await fs.readFile(coverPath);
+  } else if (coverTitle) {
+    const { generateCoverPdf } = await import("./cover.js");
+    const firstPage = contentPdf.getPage(0);
+    coverBytes = await generateCoverPdf({
+      title: coverTitle,
+      subtitle: coverSubtitle,
+      author: coverAuthor,
+      date: coverDate,
+      width: firstPage.getWidth(),
+      height: firstPage.getHeight(),
+      fontPath: coverFont
+    });
+  }
+
+  if (!coverBytes) {
+    return contentPdf;
+  }
+
+  const coverPdf = await PDFDocument.load(coverBytes);
+  const merged = await PDFDocument.create();
+
+  const coverPages = await merged.copyPages(coverPdf, coverPdf.getPageIndices());
+  const contentPages = await merged.copyPages(contentPdf, contentPdf.getPageIndices());
+
+  for (const page of [...coverPages, ...contentPages]) {
+    merged.addPage(page);
+  }
+
+  return merged;
+}
+
+export async function imposeBooklet({
+  input,
+  output,
+  signatureSize,
+  duplex = "short-edge",
+  coverPath,
+  coverTitle,
+  coverSubtitle,
+  coverAuthor,
+  coverDate,
+  coverFont
+}) {
   assertPdfPath(input, "Input");
   assertPdfPath(output, "Output");
 
@@ -92,12 +144,21 @@ export async function imposeBooklet({ input, output, signatureSize, duplex = "sh
   }
 
   const inputBytes = await fs.readFile(input);
-  const sourcePdf = await PDFDocument.load(inputBytes);
-  const totalPages = sourcePdf.getPageCount();
+  const contentPdf = await PDFDocument.load(inputBytes);
 
-  if (totalPages === 0) {
+  if (contentPdf.getPageCount() === 0) {
     throw new Error("Input PDF has no pages.");
   }
+
+  const sourcePdf = await buildSourceWithCover(contentPdf, {
+    coverPath,
+    coverTitle,
+    coverSubtitle,
+    coverAuthor,
+    coverDate,
+    coverFont
+  });
+  const totalPages = sourcePdf.getPageCount();
 
   const pagesPerSignature = parseSignatureSize(signatureSize, totalPages);
   const signatureCount = Math.ceil(totalPages / pagesPerSignature);
@@ -151,6 +212,7 @@ export async function imposeBooklet({ input, output, signatureSize, duplex = "sh
     input,
     output,
     booklet: true,
+    cover: coverPath ? "file" : coverTitle ? "generated" : null,
     duplex,
     pages: totalPages,
     signatureSize: pagesPerSignature,
